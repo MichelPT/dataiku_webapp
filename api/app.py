@@ -1,7 +1,7 @@
 # /api/app.py
 from flask import Flask, request, jsonify, Response
 from app.services.qc_service import run_full_qc_pipeline
-from app.services.data_processing import fill_null_values_in_marker_range, handle_null_values, selective_normalize_handler, trim_data_depth
+from app.services.data_processing import fill_null_values_in_marker_range, handle_null_values, selective_normalize_handler, smoothing, trim_data_depth
 from app.services.vsh_calculation import calculate_vsh_from_gr
 import logging
 import os
@@ -14,7 +14,8 @@ from app.services.plotting_service import (
     plot_log_default,
     plot_normalization,
     plot_phie_den,
-    plot_gsa_main
+    plot_gsa_main,
+    plot_smoothing
 )
 from app.services.porosity import calculate_porosity
 from app.services.depth_matching import depth_matching, plot_depth_matching_results
@@ -283,10 +284,10 @@ def run_interval_normalization():
 
         # Ambil parameter normalisasi
         log_in_col = params.get('LOG_IN', 'GR')
-        calib_min = float(params.get('CALIB_MIN', 40))
-        calib_max = float(params.get('CALIB_MAX', 140))
-        pct_min = int(params.get('PCT_MIN', 3))
-        pct_max = int(params.get('PCT_MAX', 97))
+        low_ref = float(params.get('LOW_REF', 40))
+        high_ref = float(params.get('HIGH_REF', 140))
+        low_in = int(params.get('LOW_IN', 5))
+        high_in = int(params.get('HIGH_IN', 95))
         cutoff_min = float(params.get('CUTOFF_MIN', 0.0))
         cutoff_max = float(params.get('CUTOFF_MAX', 250.0))
 
@@ -306,10 +307,10 @@ def run_interval_normalization():
                 log_column=log_in_col,
                 marker_column='MARKER',
                 target_markers=selected_intervals,
-                calib_min=calib_min,
-                calib_max=calib_max,
-                pct_min=pct_min,
-                pct_max=pct_max,
+                low_ref=low_ref,
+                high_ref=high_ref,
+                low_in=low_in,
+                high_in=high_in,
                 cutoff_min=cutoff_min,
                 cutoff_max=cutoff_max
             )
@@ -329,6 +330,57 @@ def run_interval_normalization():
 
         return jsonify({
             "message": f"Normalisasi selesai untuk {len(processed_dfs)} sumur.",
+            "data": result_json
+        })
+
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/api/run-smoothing', methods=['POST', 'OPTIONS'])
+def run_smoothing():
+    if request.method == 'OPTIONS':
+        return jsonify({'status': 'ok'}), 200
+
+    try:
+        payload = request.get_json()
+        selected_wells = payload.get('selected_wells', [])
+        selected_intervals = payload.get('selected_intervals', [])
+
+        if not selected_wells or not selected_intervals:
+            return jsonify({"error": "Sumur dan interval harus dipilih."}), 400
+
+        print(f"Mulai smoothing untuk {len(selected_wells)} sumur...")
+
+        processed_dfs = []
+
+        for well_name in selected_wells:
+            file_path = os.path.join(WELLS_DIR, f"{well_name}.csv")
+            if not os.path.exists(file_path):
+                print(f"Peringatan: File untuk {well_name} tidak ditemukan.")
+                continue
+
+            df = pd.read_csv(file_path)
+
+            df_smooth = smoothing(df)
+
+            # Simpan kembali ke file
+            df_smooth.to_csv(file_path, index=False)
+            processed_dfs.append(df_smooth)
+
+            print(f"Smoothing selesai untuk {well_name}")
+
+        if not processed_dfs:
+            return jsonify({"error": "Tidak ada file yang berhasil diproses."}), 400
+
+        # Gabungkan semua hasil jika diperlukan
+        final_df = pd.concat(processed_dfs, ignore_index=True)
+        result_json = final_df.to_json(orient='records')
+
+        return jsonify({
+            "message": f"Smoothing selesai untuk {len(processed_dfs)} sumur.",
             "data": result_json
         })
 
@@ -626,20 +678,6 @@ def get_gsa_plot():
             return jsonify({"error": str(e)}), 500
 
 
-def trim(df, depth_above=0.0, depth_below=0.0, above=0, below=0):
-    depth_above = float(depth_above)
-    depth_below = float(depth_below)
-
-    if above == 1 and below == 0:
-        df = df[df.index >= depth_above]
-    elif above == 0 and below == 1:
-        df = df[df.index <= depth_below]
-    elif above == 1 and below == 1:
-        df = df[(df.index >= depth_above) & (df.index <= depth_below)]
-
-    return df
-
-
 @app.route('/api/trim-data', methods=['POST'])
 def run_trim_well_log():
     try:
@@ -711,6 +749,49 @@ def run_trim_well_log():
         import traceback
         traceback.print_exc()
         return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/get-smoothing-plot', methods=['POST', 'OPTIONS'])
+def get_smoothing_plot():
+    """
+    Endpoint untuk membuat dan menampilkan plot hasil kalkulasi porositas.
+    """
+    if request.method == 'OPTIONS':
+        return jsonify({'status': 'ok'}), 200
+
+    if request.method == 'POST':
+        try:
+            request_data = request.get_json()
+            selected_wells = request_data.get('selected_wells', [])
+
+            if not selected_wells:
+                return jsonify({"error": "Tidak ada sumur yang dipilih."}), 400
+
+            # Baca dan gabungkan data dari sumur yang dipilih
+            df_list = [pd.read_csv(os.path.join(
+                WELLS_DIR, f"{well}.csv")) for well in selected_wells]
+            df = pd.concat(df_list, ignore_index=True)
+
+            # Validasi: Pastikan kolom hasil kalkulasi sebelumnya (VSH, PHIE) sudah ada
+            required_cols = ['GR', 'GR_MovingAvg_5', 'GR_MovingAvg_10']
+            if not all(col in df.columns for col in required_cols):
+                return jsonify({"error": "Data belum lengkap. Jalankan kalkulasi Smoothing GR terlebih dahulu."}), 400
+
+            df_marker_info = extract_markers_with_mean_depth(df)
+
+            # Panggil fungsi plotting yang baru
+            fig_result = plot_smoothing(
+                df=df,
+                df_marker=df_marker_info,
+                df_well_marker=df
+            )
+
+            return jsonify(fig_result.to_json())
+
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            return jsonify({"error": str(e)}), 500
 
 
 # This is for local development testing, Vercel will use its own server

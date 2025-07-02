@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any*/
 // frontend/src/app/(dashboard)/dashboard/modules/[moduleName]/page.tsx
 import React, { Suspense } from 'react';
 import ModulePageClient from './ModulePageClient';
@@ -23,7 +25,6 @@ const VALID_MODULES = [
 export default async function MyPage({ params }: MyPageProps) {
   const resolvedParams = await params;
   const moduleName = resolvedParams.moduleName;
-
   return (
     <Suspense fallback={
       <div className="h-full p-4 md:p-6 bg-gray-50">

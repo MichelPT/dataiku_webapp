@@ -6,7 +6,7 @@ import React, { createContext, useState, useContext, ReactNode, useEffect } from
 // REMOVE this import, we no longer get data from the client's DB
 // import { getProcessedWellList } from '@/lib/db'; 
 
-export type PlotType = 'default' | 'normalization' | 'porosity' | 'gsa';
+export type PlotType = 'default' | 'normalization' | 'smoothing' | 'porosity' | 'gsa';
 
 interface DashboardContextType {
   availableWells: string[];
@@ -76,7 +76,7 @@ const [wellColumns, setWellColumns] = useState<Record<string, string[]>>({});
       if (!response.ok) throw new Error('Network error saat ambil kolom well');
 
       const data = await response.json();
-      setWellColumns(data); // Simpan dalam state
+      setWellColumns(data); 
     } catch (err) {
       console.error('Gagal mengambil kolom well:', err);
     }
