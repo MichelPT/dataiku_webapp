@@ -90,7 +90,6 @@ export default function GsaCalculationParams() {
   const handleRowToggle = (id: number, isEnabled: boolean) => {
     setLinkedRows(prev => ({ ...prev, [id]: isEnabled }));
   };
-  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);

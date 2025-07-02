@@ -80,7 +80,7 @@ export default function NormalizationParams() {
   const handleRowToggle = (id: number, isEnabled: boolean) => {
     setRowSync(prev => ({ ...prev, [id]: isEnabled }));
   };
-  
+    
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
