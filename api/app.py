@@ -22,6 +22,7 @@ from app.services.depth_matching import depth_matching, plot_depth_matching_resu
 from app.services.rgsa import process_all_wells_rgsa
 from app.services.dgsa import process_all_wells_dgsa
 from app.services.ngsa import process_all_wells_ngsa
+from app.services.histogram import plot_histogram
 
 app = Flask(__name__)
 
@@ -788,6 +789,41 @@ def get_smoothing_plot():
                 df_marker=df_marker_info,
                 df_well_marker=df
             )
+
+            return jsonify(fig_result.to_json())
+
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            return jsonify({"error": str(e)}), 500
+
+
+@app.route('/api/get-histogram-plot', methods=['POST', 'OPTIONS'])
+def get_histogram_plot():
+    """
+    Endpoint untuk membuat plot histogram berdasarkan sumur dan parameter
+    yang dipilih oleh pengguna.
+    """
+    if request.method == 'OPTIONS':
+        return jsonify({'status': 'ok'}), 200
+
+    if request.method == 'POST':
+        try:
+            payload = request.get_json()
+            selected_wells = payload.get('selected_wells', [])
+            log_to_plot = payload.get('log_column')
+            num_bins = int(payload.get('bins', 50))
+
+            if not selected_wells:
+                return jsonify({"error": "Tidak ada sumur yang dipilih."}), 400
+            if not log_to_plot:
+                return jsonify({"error": "Tidak ada log yang dipilih untuk dianalisis."}), 400
+
+            df_list = [pd.read_csv(os.path.join(
+                WELLS_DIR, f"{well}.csv")) for well in selected_wells]
+            df = pd.concat(df_list, ignore_index=True)
+
+            fig_result = plot_histogram(df, log_to_plot, num_bins)
 
             return jsonify(fig_result.to_json())
 
