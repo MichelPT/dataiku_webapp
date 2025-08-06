@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState, ChangeEvent } from 'react';
+import React, { useState, ChangeEvent, Suspense } from 'react';
+import { FastPageSkeleton } from '@/components/ui/fast-skeletons';
 
-export default function SeedDataPage() {
+function SeedDataContent() {
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [isUploading, setIsUploading] = useState(false);
     const [message, setMessage] = useState('');
@@ -86,5 +87,13 @@ export default function SeedDataPage() {
             {message && <p style={{ color: 'green', marginTop: '20px' }}>Success: {message}</p>}
             {error && <p style={{ color: 'red', marginTop: '20px' }}>Error: {error}</p>}
         </div>
+    );
+}
+
+export default function SeedDataPage() {
+    return (
+        <Suspense fallback={<FastPageSkeleton />}>
+            <SeedDataContent />
+        </Suspense>
     );
 }

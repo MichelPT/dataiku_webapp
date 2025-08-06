@@ -2,8 +2,8 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useDashboard } from '@/contexts/DashboardContext';
-import { Loader2 } from 'lucide-react';
+import { useDashboard } from '@/shared/contexts/DashboardContext';
+import { InlineLoader } from '@/components/ui/fast-skeletons';
 
 export default function SwgradPage() {
     const { selectedWells } = useDashboard();
@@ -59,7 +59,7 @@ export default function SwgradPage() {
 
     return (
         <div className="flex flex-col items-center justify-center h-full p-6 text-center">
-            <Loader2 className="w-12 h-12 animate-spin text-blue-600 mb-4" />
+            <InlineLoader />
             <h1 className="text-2xl font-bold mb-2">Running SWGRAD Calculation...</h1>
             <p className="text-gray-600">Please wait. You will be redirected automatically when the process is complete.</p>
         </div>

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { useDashboard } from '@/contexts/DashboardContext';
+import { useDashboard } from '@/shared/contexts/DashboardContext';
 import { Loader2, AlertTriangle } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { type Layout, type Data } from 'plotly.js';

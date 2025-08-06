@@ -1,10 +1,10 @@
 'use client';
 
 import React, { useMemo, useState } from 'react';
-import { useDashboard } from '@/contexts/DashboardContext';
+import { useDashboard } from '@/shared/contexts/DashboardContext';
 import { useRouter } from 'next/navigation';
 import Select from 'react-select';
-import { Loader2 } from 'lucide-react';
+import { InlineLoader } from '@/components/ui/fast-skeletons';
 
 export default function FillMissingPage() {
   const { selectedWells, wellColumns } = useDashboard();
@@ -96,7 +96,7 @@ export default function FillMissingPage() {
               className="px-6 py-2 rounded-md text-white font-semibold bg-blue-600 hover:bg-blue-700"
               disabled={isSubmitting}
             >
-              {isSubmitting ? <Loader2 className="animate-spin" /> : 'Start'}
+              {isSubmitting ? <InlineLoader /> : 'Start'}
             </button>
           </div>
         </div>

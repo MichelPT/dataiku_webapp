@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useDashboard } from '@/contexts/DashboardContext';
-import { type ParameterRow } from '@/types';
-import { Loader2 } from 'lucide-react';
+import { useDashboard } from '@/shared/contexts/DashboardContext';
+import { type ParameterRow } from '@/shared/types';
+import { InlineLoader } from '@/components/ui/fast-skeletons';
 import { useRouter } from 'next/navigation';
 
 const createInitialParameters = (intervals: string[]): ParameterRow[] => {
@@ -209,7 +209,7 @@ export default function NormalizationParams() {
                     <div className="flex justify-end gap-2 mt-4 pt-4 border-t">
                         <button type="button" onClick={() => router.back()} className="px-6 py-2 rounded-md text-gray-800 bg-gray-200 hover:bg-gray-300 font-semibold">Cancel</button>
                         <button type="submit" className="px-6 py-2 rounded-md text-white font-semibold bg-blue-600 hover:bg-blue-700 flex items-center justify-center" disabled={isSubmitting || isFetchingDefaults}>
-                            {(isSubmitting || isFetchingDefaults) ? <Loader2 className="animate-spin" /> : 'Start'}
+                            {(isSubmitting || isFetchingDefaults) ? <InlineLoader /> : 'Start'}
                         </button>
                     </div>
                 </div>

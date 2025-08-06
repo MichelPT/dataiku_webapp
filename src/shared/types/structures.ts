@@ -45,7 +45,7 @@ export interface FieldDetails {
         wells_count: number;
         total_records: number;
         columns: string[];
-        sample_data: any[];
+        sample_data: Record<string, unknown>[];
         error?: string;
     }[];
     total_wells: number;
@@ -67,7 +67,7 @@ export interface StructureDetails {
         max?: number;
         count: number;
     }>;
-    sample_data: any[];
+    sample_data: Record<string, unknown>[];
     data_types: Record<string, string>;
 }
 
@@ -77,7 +77,7 @@ export interface WellDetails {
         field_name: string;
         structure_name: string;
         records_count: number;
-        sample_data: any[];
+        sample_data: Record<string, unknown>[];
     }[];
     total_records: number;
     fields: string[];

@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import dynamic from 'next/dynamic';
-import { Loader2, AlertTriangle, Database } from 'lucide-react';
+import { AlertTriangle, Database } from 'lucide-react';
+import { InlineLoader } from '@/components/ui/fast-skeletons';
 import { type Layout, type Data } from 'plotly.js';
 
 // Impor Plotly secara dinamis untuk performa sisi klien
@@ -62,7 +63,7 @@ export default function DepthMatchingPage() {
     if (isLoading) {
       return (
         <div className="flex flex-col items-center justify-center h-full text-center text-gray-500">
-          <Loader2 className="animate-spin h-12 w-12 text-blue-600" />
+          <InlineLoader />
           <p className="mt-4 text-lg font-semibold">Menjalankan Depth Matching untuk {selectedWell}...</p>
           <p className="text-sm">Proses ini mungkin memakan waktu beberapa saat.</p>
         </div>

@@ -4,7 +4,7 @@
 
 import React from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { useAppDataStore } from '@/stores/useAppDataStore';
+import { useAppDataStore } from '@/shared/stores/useAppDataStore';
 import dynamic from 'next/dynamic';
 import { ArrowLeft } from 'lucide-react';
 

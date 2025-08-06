@@ -1,8 +1,8 @@
 'use client';
 
 import React from 'react';
-import { type ParameterRow } from '@/types';
-import { useDashboard } from '@/contexts/DashboardContext';
+import { type ParameterRow } from '@/shared/types';
+import { useDashboard } from '@/shared/contexts/DashboardContext';
 
 interface SworadParamsProps {
     parameters: ParameterRow[];
@@ -10,7 +10,7 @@ interface SworadParamsProps {
 }
 
 export default function SworadParams({ parameters, onParameterChange }: SworadParamsProps) {
-    const { selectedWells, selectedIntervals } = useDashboard();
+    const { selectedIntervals } = useDashboard();
 
     const handleUnifiedValueChange = (id: number, newValue: string) => {
         const updatedParams = parameters.map(param => {

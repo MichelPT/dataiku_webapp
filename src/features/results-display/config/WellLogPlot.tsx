@@ -4,8 +4,8 @@
 import React, { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import { type Layout, type Data } from 'plotly.js';
-import { useDashboard } from '@/contexts/DashboardContext';
-import { Loader2 } from 'lucide-react';
+import { useDashboard } from '@/shared/contexts/DashboardContext';
+import { InlineLoader } from '@/components/ui/fast-skeletons';
 
 const Plot = dynamic(() => import('react-plotly.js'), { ssr: false });
 
@@ -125,8 +125,8 @@ export default function WellLogPlot() {
   if (isLoading) {
     return (
       <div className="flex h-full w-full items-center justify-center">
-        <Loader2 className="mr-2 h-8 w-8 animate-spin" />
-        <span>Loading Plot from Server...</span>
+        <InlineLoader />
+        <span className="ml-2">Loading Plot from Server...</span>
       </div>
     );
   }

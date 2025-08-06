@@ -1,159 +1,412 @@
-"use client";
+"use client"
 
-import { PlotType, useDashboard } from '@/contexts/DashboardContext';
-import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useState, useEffect, memo, useCallback } from "react"
+import Link from "next/link"
+import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Separator } from "@/components/ui/separator"
+import { BarChart3, Target, Settings } from "lucide-react"
+import { type PlotType, useDashboard } from "@/shared/contexts/DashboardContext"
+import { toast } from "sonner"
 
-export default function LeftSidebar() {
-  const { availableWells, selectedWells, toggleWellSelection, selectedIntervals, toggleInterval, plotType, availableIntervals, setPlotType } = useDashboard();
-  const [isMounted, setIsMounted] = useState(false);
+export const LeftSidebar = memo(function LeftSidebar() {
+  const {
+    availableWells,
+    selectedWells,
+    toggleWellSelection,
+    selectedIntervals,
+    toggleInterval,
+    plotType,
+    availableIntervals,
+    setPlotType,
+  } = useDashboard()
+
+  const [isMounted, setIsMounted] = useState(false)
+  const [isInitialLoading, setIsInitialLoading] = useState(true)
 
   useEffect(() => {
-    setIsMounted(true);
-  }, []);
+    const timer = setTimeout(() => {
+      setIsInitialLoading(false)
+      setIsMounted(true)
+      toast.success("Data selection loaded", {
+        description: "Wells and intervals are ready for selection",
+      })
+    }, 1000)
 
-  const handleSelectAllWells = (checked: boolean) => {
-    if (checked) {
-      availableWells.forEach(well => {
-        if (!selectedWells.includes(well)) {
-          toggleWellSelection(well);
+    return () => clearTimeout(timer)
+  }, [])
+
+  const handleSelectAllWells = useCallback(
+    (checked: boolean) => {
+      if (checked) {
+        const newSelections = availableWells.filter((well) => !selectedWells.includes(well))
+        newSelections.forEach((well) => toggleWellSelection(well))
+        if (newSelections.length > 0) {
+          toast.success("Wells selected", {
+            description: `Selected ${newSelections.length} additional wells`,
+          })
         }
-      });
-    } else {
-      selectedWells.forEach(well => toggleWellSelection(well));
-    }
-  };
-
-  const handleSelectAllIntervals = (checked: boolean) => {
-    if (checked) {
-      availableIntervals.forEach(interval => {
-        if (!selectedIntervals.includes(interval)) {
-          toggleInterval(interval);
+      } else {
+        const count = selectedWells.length
+        selectedWells.forEach((well) => toggleWellSelection(well))
+        if (count > 0) {
+          toast.info("Wells deselected", {
+            description: `Deselected ${count} wells`,
+          })
         }
-      });
-    } else {
-      selectedIntervals.forEach(interval => toggleInterval(interval));
-    }
-  };
+      }
+    },
+    [availableWells, selectedWells, toggleWellSelection],
+  )
 
+  const handleSelectAllIntervals = useCallback(
+    (checked: boolean) => {
+      if (checked) {
+        const newSelections = availableIntervals.filter((interval) => !selectedIntervals.includes(interval))
+        newSelections.forEach((interval) => toggleInterval(interval))
+        if (newSelections.length > 0) {
+          toast.success("Intervals selected", {
+            description: `Selected ${newSelections.length} additional intervals`,
+          })
+        }
+      } else {
+        const count = selectedIntervals.length
+        selectedIntervals.forEach((interval) => toggleInterval(interval))
+        if (count > 0) {
+          toast.info("Intervals deselected", {
+            description: `Deselected ${count} intervals`,
+          })
+        }
+      }
+    },
+    [availableIntervals, selectedIntervals, toggleInterval],
+  )
+
+  const handleWellToggle = useCallback(
+    (well: string) => {
+      toggleWellSelection(well)
+      const isSelected = selectedWells.includes(well)
+      toast.info(isSelected ? "Well deselected" : "Well selected", {
+        description: `${well} ${isSelected ? "removed from" : "added to"} selection`,
+      })
+    },
+    [selectedWells, toggleWellSelection],
+  )
+
+  const handleIntervalToggle = useCallback(
+    (interval: string) => {
+      toggleInterval(interval)
+      const isSelected = selectedIntervals.includes(interval)
+      toast.info(isSelected ? "Interval deselected" : "Interval selected", {
+        description: `${interval} ${isSelected ? "removed from" : "added to"} selection`,
+      })
+    },
+    [selectedIntervals, toggleInterval],
+  )
+
+  const handlePlotTypeChange = useCallback(
+    (value: PlotType) => {
+      setPlotType(value)
+      toast.success("Plot type changed", {
+        description: `Switched to ${value.replace("-", " ")} layout`,
+      })
+    },
+    [setPlotType],
+  )
+
+  // Loading skeleton that matches exact width
+  if (isInitialLoading) {
+    return (
+      <aside className="w-52 bg-white border-r border-gray-200 flex flex-col shadow-sm">
+        {/* Header Skeleton */}
+        <div className="p-4 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-indigo-50">
+          <div className="animate-pulse">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="w-8 h-8 bg-gray-200 rounded-lg"></div>
+              <div>
+                <div className="h-4 bg-gray-200 rounded w-20 mb-1"></div>
+                <div className="h-3 bg-gray-200 rounded w-16"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex-1 overflow-y-auto p-3 space-y-3">
+          {/* Wells Section Skeleton */}
+          <Card className="border-gray-200 shadow-sm">
+            <CardHeader className="pb-2 bg-gray-50 rounded-t-lg">
+              <div className="animate-pulse">
+                <div className="h-3 bg-gray-200 rounded w-16 mb-2"></div>
+                <div className="h-3 bg-gray-200 rounded w-12"></div>
+              </div>
+            </CardHeader>
+            <CardContent className="pt-3">
+              <div className="space-y-2 animate-pulse">
+                {[...Array(4)].map((_, i) => (
+                  <div key={i} className="flex items-center space-x-2 p-1">
+                    <div className="w-4 h-4 bg-gray-200 rounded"></div>
+                    <div className="h-3 bg-gray-200 rounded flex-1"></div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Intervals Section Skeleton */}
+          <Card className="border-gray-200 shadow-sm">
+            <CardHeader className="pb-2 bg-gray-50 rounded-t-lg">
+              <div className="animate-pulse">
+                <div className="h-3 bg-gray-200 rounded w-20 mb-2"></div>
+                <div className="h-3 bg-gray-200 rounded w-12"></div>
+              </div>
+            </CardHeader>
+            <CardContent className="pt-3">
+              <div className="space-y-2 animate-pulse">
+                {[...Array(3)].map((_, i) => (
+                  <div key={i} className="flex items-center space-x-2 p-1">
+                    <div className="w-4 h-4 bg-gray-200 rounded"></div>
+                    <div className="h-3 bg-gray-200 rounded flex-1"></div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Plot Configuration Skeleton */}
+          <Card className="border-gray-200 shadow-sm">
+            <CardHeader className="pb-2 bg-gradient-to-r from-orange-50 to-yellow-50 rounded-t-lg">
+              <div className="animate-pulse">
+                <div className="h-3 bg-gray-200 rounded w-24"></div>
+              </div>
+            </CardHeader>
+            <CardContent className="pt-3 space-y-3">
+              <div className="animate-pulse">
+                <div className="h-8 bg-gray-200 rounded mb-3"></div>
+                <div className="space-y-2">
+                  <div className="h-8 bg-gray-200 rounded"></div>
+                  <div className="h-8 bg-gray-200 rounded"></div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </aside>
+    )
+  }
 
   return (
-    <aside className="w-52 bg-gray-100 flex flex-col gap-2 p-2 border-r border-gray-300 h-screen">
-      <div className="grid grid-rows-[auto_1fr_1fr_1fr_auto] h-full gap-2">
-        {/* Header */}
-        <div className="text-xs font-bold text-gray-800 px-2 py-1">Data Selection</div>
-
-        {/* Well Data Section */}
-        <div className="flex flex-col bg-white rounded-lg shadow-sm overflow-hidden">
-          <div className="flex items-center gap-2 p-1.5 bg-gray-50 border-b">
-            <input
-              type="checkbox"
-              className="h-3 w-3 rounded border-gray-300 text-blue-600 focus:ring-1 focus:ring-blue-500"
-              checked={selectedWells.length === availableWells.length}
-              onChange={(e) => handleSelectAllWells(e.target.checked)}
-            />
-            <h3 className="text-xs font-bold text-gray-700">Wells</h3>
-            <span className="text-xs text-gray-500 ml-auto">{selectedWells.length}/{availableWells.length}</span>
+    <aside className="w-52 bg-white border-r border-gray-200 flex flex-col shadow-sm">
+      {/* Header */}
+      <div className="p-4 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-indigo-50">
+        <div className="flex items-center gap-2 mb-2">
+          <div className="p-1.5 bg-blue-100 rounded-lg">
+            <Settings className="w-4 h-4 text-blue-600" />
           </div>
-          <div className="overflow-y-auto flex-1 p-1">
-            <div className="flex flex-col gap-0.5">
+          <div>
+            <h2 className="text-sm font-bold text-gray-900">Data Selection</h2>
+            <p className="text-xs text-gray-600">Configure parameters</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex-1 overflow-y-auto p-3 space-y-3">
+        {/* Wells Section */}
+        <Card className="border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+          <CardHeader className="pb-2 bg-gray-50 rounded-t-lg">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="p-1 bg-green-100 rounded">
+                <Target className="w-3 h-3 text-green-600" />
+              </div>
+              <CardTitle className="text-xs font-semibold text-gray-800">Wells</CardTitle>
+              <Badge variant="outline" className="ml-auto text-xs bg-white border-gray-300">
+                {selectedWells.length}/{availableWells.length}
+              </Badge>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="select-all-wells"
+                checked={selectedWells.length === availableWells.length}
+                onCheckedChange={handleSelectAllWells}
+                className="border-gray-400"
+              />
+              <label htmlFor="select-all-wells" className="text-xs text-gray-600 cursor-pointer font-medium">
+                Select all
+              </label>
+            </div>
+          </CardHeader>
+          <CardContent className="pt-3">
+            <div className="max-h-32 overflow-y-auto space-y-1.5">
               {!isMounted ? (
-                <>
-                  <div className="h-5 bg-gray-100 rounded animate-pulse"></div>
-                  <div className="h-5 bg-gray-100 rounded animate-pulse"></div>
-                  <div className="h-5 bg-gray-100 rounded animate-pulse"></div>
-                </>
+                <div className="space-y-1.5">
+                  {[...Array(3)].map((_, i) => (
+                    <div key={i} className="h-5 bg-gray-100 rounded animate-pulse" />
+                  ))}
+                </div>
               ) : (
-                availableWells.map(well => (
-                  <label key={well} className="flex items-center gap-2 px-2 py-0.5 rounded hover:bg-gray-50 cursor-pointer text-xs">
-                    <input
-                      type="checkbox"
-                      className="h-3 w-3 rounded border-gray-300 text-blue-600 focus:ring-1 focus:ring-blue-500"
+                availableWells.map((well) => (
+                  <div
+                    key={well}
+                    className="flex items-center space-x-2 p-1 rounded hover:bg-gray-50 transition-colors"
+                  >
+                    <Checkbox
+                      id={`well-${well}`}
                       checked={selectedWells.includes(well)}
-                      onChange={() => toggleWellSelection(well)}
+                      onCheckedChange={() => handleWellToggle(well)}
+                      className="border-gray-400"
                     />
-                    <span className="truncate">{well}</span>
-                  </label>
+                    <label
+                      htmlFor={`well-${well}`}
+                      className="text-xs text-gray-700 cursor-pointer truncate font-medium flex-1"
+                    >
+                      {well}
+                    </label>
+                    {selectedWells.includes(well) && <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>}
+                  </div>
                 ))
               )}
             </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
 
         {/* Intervals Section */}
-        <div className="flex flex-col bg-white rounded-lg shadow-sm overflow-hidden">
-          <div className="flex items-center gap-2 p-1.5 bg-gray-50 border-b">
-            <input
-              type="checkbox"
-              className="h-3 w-3 rounded border-gray-300 text-blue-600 focus:ring-1 focus:ring-blue-500"
-              checked={selectedIntervals.length === availableIntervals.length}
-              onChange={(e) => handleSelectAllIntervals(e.target.checked)}
-            />
-            <h3 className="text-xs font-bold text-gray-700">Intervals</h3>
-            <span className="text-xs text-gray-500 ml-auto">{selectedIntervals.length}/{availableIntervals.length}</span>
-          </div>
-          <div className="overflow-y-auto flex-1 p-1">
-            <div className="flex flex-col gap-0.5">
-              {availableIntervals.map(interval => (
-                <label key={interval} className="flex items-center gap-2 px-2 py-0.5 rounded hover:bg-gray-50 cursor-pointer text-xs">
-                  <input
-                    type="checkbox"
-                    className="h-3 w-3 rounded border-gray-300 text-blue-600 focus:ring-1 focus:ring-blue-500"
+        <Card className="border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+          <CardHeader className="pb-2 bg-gray-50 rounded-t-lg">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="p-1 bg-purple-100 rounded">
+                <BarChart3 className="w-3 h-3 text-purple-600" />
+              </div>
+              <CardTitle className="text-xs font-semibold text-gray-800">Intervals</CardTitle>
+              <Badge variant="outline" className="ml-auto text-xs bg-white border-gray-300">
+                {selectedIntervals.length}/{availableIntervals.length}
+              </Badge>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="select-all-intervals"
+                checked={selectedIntervals.length === availableIntervals.length}
+                onCheckedChange={handleSelectAllIntervals}
+                className="border-gray-400"
+              />
+              <label htmlFor="select-all-intervals" className="text-xs text-gray-600 cursor-pointer font-medium">
+                Select all
+              </label>
+            </div>
+          </CardHeader>
+          <CardContent className="pt-3">
+            <div className="max-h-32 overflow-y-auto space-y-1.5">
+              {availableIntervals.map((interval) => (
+                <div
+                  key={interval}
+                  className="flex items-center space-x-2 p-1 rounded hover:bg-gray-50 transition-colors"
+                >
+                  <Checkbox
+                    id={`interval-${interval}`}
                     checked={selectedIntervals.includes(interval)}
-                    onChange={() => toggleInterval(interval)}
+                    onCheckedChange={() => handleIntervalToggle(interval)}
+                    className="border-gray-400"
                   />
-                  <span className="truncate">{interval}</span>
-                </label>
+                  <label
+                    htmlFor={`interval-${interval}`}
+                    className="text-xs text-gray-700 cursor-pointer truncate font-medium flex-1"
+                  >
+                    {interval}
+                  </label>
+                  {selectedIntervals.includes(interval) && (
+                    <div className="w-1.5 h-1.5 bg-purple-500 rounded-full"></div>
+                  )}
+                </div>
               ))}
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Plot Configuration Section */}
+        <Card className="border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+          <CardHeader className="pb-2 bg-gradient-to-r from-orange-50 to-yellow-50 rounded-t-lg">
+            <div className="flex items-center gap-2">
+              <div className="p-1 bg-orange-100 rounded">
+                <BarChart3 className="w-3 h-3 text-orange-600" />
+              </div>
+              <CardTitle className="text-xs font-semibold text-gray-800">Plot Configuration</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent className="pt-3 space-y-3">
+            <div>
+              <label className="text-xs font-medium text-gray-700 mb-1.5 block">Layout Type</label>
+              <Select value={plotType} onValueChange={handlePlotTypeChange}>
+                <SelectTrigger className="w-full border-gray-300 bg-white text-xs h-8">
+                  <SelectValue placeholder="Select layout" />
+                </SelectTrigger>
+                <SelectContent className="bg-white border-gray-200">
+                  <SelectItem value="default">Layout Default</SelectItem>
+                  <SelectItem value="normalization">Layout Normalisasi</SelectItem>
+                  <SelectItem value="smoothing">Layout Smoothing</SelectItem>
+                  <SelectItem value="vsh">Layout VSH</SelectItem>
+                  <SelectItem value="porosity">Layout Porosity</SelectItem>
+                  <SelectItem value="sw">Layout SW</SelectItem>
+                  <SelectItem value="rwa">Layout RWA</SelectItem>
+                  <SelectItem value="module2">Layout Module 2</SelectItem>
+                  <SelectItem value="gsa">Layout GSA</SelectItem>
+                  <SelectItem value="rpbe-rgbe">Layout RPBE RGBE</SelectItem>
+                  <SelectItem value="iqual">Layout IQUAL</SelectItem>
+                  <SelectItem value="swgrad">Layout SWGRAD</SelectItem>
+                  <SelectItem value="dns-dnsv">Layout DNS-DNSV</SelectItem>
+                  <SelectItem value="rt-ro">Layout RT-RO</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <Separator className="bg-gray-200" />
+
+            <div>
+              <label className="text-xs font-medium text-gray-700 mb-2 block">Analysis Tools</label>
+              <div className="space-y-1.5">
+                <Link href="histogram">
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start text-xs h-7 bg-white border-gray-300 hover:bg-gray-50 text-gray-700"
+                  >
+                    <BarChart3 className="w-3 h-3 mr-1.5" />
+                    Histogram
+                  </Button>
+                </Link>
+                <Link href="crossplot">
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start text-xs h-7 bg-white border-gray-300 hover:bg-gray-50 text-gray-700"
+                  >
+                    <Target className="w-3 h-3 mr-1.5" />
+                    Crossplot
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Footer Summary */}
+      <div className="p-3 border-t border-gray-100 bg-gray-50">
+        <div className="text-xs text-gray-600 space-y-1">
+          <div className="flex justify-between items-center">
+            <span>Selected Wells:</span>
+            <Badge variant="outline" className="text-xs bg-white border-gray-300">
+              {selectedWells.length}
+            </Badge>
           </div>
-        </div>
-
-        {/* Saved Sets Section - Commented out for now */}
-
-        {/* Plot Display Section */}
-        <div className="bg-white rounded-lg shadow-sm p-2">
-          <h3 className="text-xs font-bold text-gray-700 mb-1">Plot Display</h3>
-          <select
-            value={plotType}
-            onChange={(e) => setPlotType(e.target.value as PlotType)}
-            className="text-xs w-full bg-white border border-gray-200 rounded p-1 focus:ring-1 focus:ring-blue-500"
-          >
-            <option value="default">Layout Default</option>
-            <option value="normalization">Layout Normalisasi</option>
-            <option value="smoothing">Layout Smoothing</option>
-            <option value="vsh">Layout VSH</option>
-            <option value="porosity">Layout Porosity</option>
-            <option value="sw">Layout SW</option>
-            <option value="rwa">Layout RWA</option>
-            <option value="module2">Layout Module 2</option>
-            <option value="gsa">Layout GSA</option>
-            <option value="rpbe-rgbe">Layout RPBE RGBE</option>
-            <option value="iqual">Layout IQUAL</option>
-            <option value="swgrad">Layout SWGRAD</option>
-            <option value="dns-dnsv">Layout DNS-DNSV</option>
-            <option value="rt-ro">Layout RT-RO</option>
-          </select>
-
-          <div className="flex flex-col gap-1.5">
-            {/* 2. Tombol untuk navigasi ke modul Histogram */}
-            <Link href="histogram">
-              <button className="text-xs w-full bg-gray-50 border border-gray-200 rounded p-1.5 text-center font-medium hover:bg-gray-100 focus:ring-1 focus:ring-blue-500 transition-colors">
-                Histogram
-              </button>
-            </Link>
-          </div>
-
-          <div className="flex flex-col gap-1.5">
-            {/* 2. Tombol untuk navigasi ke modul Crossplot */}
-            <Link href="crossplot">
-               <button className="text-xs w-full bg-gray-50 border border-gray-200 rounded p-1.5 text-center font-medium hover:bg-gray-100 focus:ring-1 focus:ring-blue-500 transition-colors">
-                Crossplot
-              </button>
-            </Link>
+          <div className="flex justify-between items-center">
+            <span>Selected Intervals:</span>
+            <Badge variant="outline" className="text-xs bg-white border-gray-300">
+              {selectedIntervals.length}
+            </Badge>
           </div>
         </div>
       </div>
     </aside>
-  );
-}
+  )
+})
+
+export default LeftSidebar

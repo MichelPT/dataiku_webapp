@@ -2,8 +2,8 @@
 
 import React, { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Loader2 } from 'lucide-react';
-import { useDashboard } from '@/contexts/DashboardContext';
+import { InlineLoader } from '@/components/ui/fast-skeletons';
+import { useDashboard } from '@/shared/contexts/DashboardContext';
 
 export default function RtRoPage() {
     const { selectedWells } = useDashboard();
@@ -61,7 +61,7 @@ export default function RtRoPage() {
     // This UI is shown while the calculation is in progress
     return (
         <div className="flex flex-col items-center justify-center h-full p-6 text-center">
-            <Loader2 className="w-12 h-12 animate-spin text-blue-600 mb-4" />
+            <InlineLoader />
             <h1 className="text-2xl font-bold mb-2">Running RT/RO Calculation...</h1>
             <p className="text-gray-600">Please wait. You will be redirected automatically when the process is complete.</p>
         </div>

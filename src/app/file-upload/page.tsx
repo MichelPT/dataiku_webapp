@@ -1,7 +1,12 @@
-// app/file-upload/page.tsx
-import React from 'react';
+'use client';
+import React, { Suspense } from 'react';
 import FileUpload from '@/features/file_upload/page';
+import { FastPageSkeleton } from '@/components/ui/fast-skeletons';
 
 export default function FileUploadPage() {
-  return <FileUpload />;
+  return (
+    <Suspense fallback={<FastPageSkeleton />}>
+      <FileUpload />
+    </Suspense>
+  );
 }

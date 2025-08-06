@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { type LogDataRow, type MarkerData, type XptNote } from '@/types'; // Keep all types from plot-display
+import { type LogDataRow, type MarkerData, type XptNote } from '@/shared/types'; // Keep all types from plot-display
 import { type Data, type Layout } from 'plotly.js';
 import {
   dataCol,

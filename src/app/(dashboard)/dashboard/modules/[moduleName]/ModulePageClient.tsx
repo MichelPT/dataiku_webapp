@@ -4,8 +4,8 @@
 
 import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAppDataStore } from '@/stores/useAppDataStore';
-import { type ParameterRow } from '@/types';
+import { useAppDataStore } from '@/shared/stores/useAppDataStore';
+import { type ParameterRow } from '@/shared/types';
 import dynamic from 'next/dynamic';
 import HistogramParams from '@/features/histogram/HistogramParams';
 import CrossplotViewerGR_NPHI from '@/features/crossplot/CrossPlotGR-NPHI';

@@ -1,10 +1,10 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Loader2, AlertTriangle } from 'lucide-react';
-import { useAppDataStore } from '@/stores/useAppDataStore';
-import { useDashboard } from '@/contexts/DashboardContext';
-import { type PlotData, type ParameterRow } from '@/types';
+import { AlertTriangle } from 'lucide-react';
+import { InlineLoader } from '@/components/ui/fast-skeletons';
+import { useDashboard } from '@/shared/contexts/DashboardContext';
+import { type PlotData, type ParameterRow } from '@/shared/types';
 import { useRouter } from 'next/navigation';
 import SworadParams from './components/SworadParams';
 
@@ -16,7 +16,7 @@ export default function SworadPage() {
     const [error, setError] = useState<string | null>(null);
     const [plot, setPlot] = useState<PlotData | null>(null);
     const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-    const endpoint = `${apiUrl}/api/run-swgrad`;
+    const endpoint = `${apiUrl}/api/run-sworad`;
     const createInitialParameters = (intervals: string[]): ParameterRow[] => {
         const createValues = (val: string | number) => Object.fromEntries(intervals.map(i => [i, val]));
 
@@ -123,7 +123,7 @@ export default function SworadPage() {
     if (isLoading) {
         return (
             <div className="flex items-center justify-center h-full">
-                <Loader2 className="w-6 h-6 animate-spin" />
+                <InlineLoader />
                 <span className="ml-2">Loading SWORAD analysis...</span>
             </div>
         );
@@ -155,7 +155,7 @@ export default function SworadPage() {
                         className="px-6 py-2 rounded-md text-white font-semibold bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300"
                         disabled={isLoading || !selectedWells || selectedWells.length === 0}
                     >
-                        {isLoading ? <Loader2 className="animate-spin" /> : 'Calculate'}
+                        {isLoading ? <InlineLoader /> : 'Calculate'}
                     </button>
                 </div>
             </div>
@@ -172,6 +172,16 @@ export default function SworadPage() {
             <div className="flex-grow flex flex-col">
                 <h3 className="text-lg font-semibold mb-2 flex-shrink-0">Parameters</h3>
                 <SworadParams parameters={parameters} onParameterChange={handleParameterChange} />
+                
+                {plot && (
+                    <div className="mt-6 flex-grow">
+                        <h3 className="text-lg font-semibold mb-2">Results</h3>
+                        <div className="border rounded-lg p-4 bg-gray-50">
+                            <p className="text-gray-600">Plot visualization will be displayed here</p>
+                            <pre className="text-xs mt-2 overflow-auto">{JSON.stringify(plot, null, 2)}</pre>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );

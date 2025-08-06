@@ -2,7 +2,7 @@
 // app/your-route/utils/fileParsers.ts
 import Papa from 'papaparse';
 import * as XLSX from 'xlsx';
-import { ParsedFileData } from '@/types'; // Adjust path if needed
+import { ParsedFileData } from '@/shared/types'; // Adjust path if needed
 
 export const parseLASFile = (fileContent: string): ParsedFileData => {
   const lines = fileContent.split('\n');

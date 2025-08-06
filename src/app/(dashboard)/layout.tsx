@@ -5,8 +5,8 @@
 import React from 'react';
 import LeftSidebar from '@/components/layout/LeftSidebar';
 import RightSidebar from '@/components/layout/RightSidebar';
-import MainContent from '@/components/layout/MainContent';
-import { DashboardProvider } from '@/contexts/DashboardContext';
+import { MainContent } from '@/components/layout/MainContent';
+import { DashboardProvider } from '@/shared/contexts/DashboardContext';
 import { usePathname } from 'next/navigation';
 
 export default function DashboardLayout({

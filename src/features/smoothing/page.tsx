@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useDashboard } from '@/contexts/DashboardContext';
+import { useDashboard } from '@/shared/contexts/DashboardContext';
 
 export default function SmoothingPage() {
   const { selectedWells, selectedIntervals } = useDashboard();

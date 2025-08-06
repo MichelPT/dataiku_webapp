@@ -10,7 +10,7 @@ interface Structure {
     wells_count: number;
     total_records: number;
     columns: string[];
-    sample_data: any[];
+    sample_data: Record<string, unknown>[];
     error?: string;
 }
 
@@ -28,7 +28,7 @@ async function getFieldDetails(fieldName: string): Promise<FieldDetails> {
     
     try {
         await fs.access(fieldPath);
-    } catch (error) {
+    } catch {
         throw new Error(`Field not found: ${fieldName}`);
     }
 
@@ -54,7 +54,7 @@ async function getFieldDetails(fieldName: string): Promise<FieldDetails> {
             const workbook = xlsx.read(file, { type: 'buffer' });
             const sheetName = workbook.SheetNames[0];
             const worksheet = workbook.Sheets[sheetName];
-            const data: any[][] = xlsx.utils.sheet_to_json(worksheet, { header: 1 });
+            const data: (string | number)[][] = xlsx.utils.sheet_to_json(worksheet, { header: 1 });
 
             if (data.length === 0) {
                 fieldDetails.structures.push({
@@ -85,7 +85,7 @@ async function getFieldDetails(fieldName: string): Promise<FieldDetails> {
 
             // Get sample data (first 5 rows)
             const sampleData = data.slice(1, 6).map(row => {
-                const obj: any = {};
+                const obj: Record<string, unknown> = {};
                 headers.forEach((header, index) => {
                     obj[header] = row[index];
                 });
@@ -105,8 +105,9 @@ async function getFieldDetails(fieldName: string): Promise<FieldDetails> {
             fieldDetails.structures.push(structureInfo);
             fieldDetails.total_records += data.length - 1;
 
-        } catch (e: any) {
-            console.error(`Error reading ${structurePath}: ${e.message}`);
+        } catch (e: unknown) {
+            const errorMessage = e instanceof Error ? e.message : 'Unknown error';
+            console.error(`Error reading ${structurePath}: ${errorMessage}`);
             fieldDetails.structures.push({
                 structure_name: structureName,
                 file_path: structurePath,
@@ -115,7 +116,7 @@ async function getFieldDetails(fieldName: string): Promise<FieldDetails> {
                 total_records: 0,
                 columns: [],
                 sample_data: [],
-                error: e.message
+                error: errorMessage
             });
         }
     }
@@ -128,12 +129,14 @@ async function getFieldDetails(fieldName: string): Promise<FieldDetails> {
 
 export async function GET(
     request: Request,
-    { params }: { params: { fieldName: string } }
+    { params }: { params: Promise<{ fieldName: string }> }
 ) {
     try {
-        const data = await getFieldDetails(params.fieldName);
+        const { fieldName } = await params;
+        const data = await getFieldDetails(fieldName);
         return NextResponse.json(data);
-    } catch (error: any) {
-        return NextResponse.json({ error: error.message }, { status: 404 });
+    } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        return NextResponse.json({ error: errorMessage }, { status: 404 });
     }
 }

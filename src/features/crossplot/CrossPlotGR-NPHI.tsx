@@ -3,10 +3,10 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useDashboard } from '@/contexts/DashboardContext';
+import { useDashboard } from '@/shared/contexts/DashboardContext';
 import { Loader2 } from 'lucide-react';
 import dynamic from 'next/dynamic';
-import { useAppDataStore } from '@/stores/useAppDataStore';
+import { useAppDataStore } from '@/shared/stores/useAppDataStore';
 
 const Plot = dynamic(() => import('react-plotly.js'), { ssr: false });
 

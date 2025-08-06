@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useDashboard } from '@/contexts/DashboardContext';
+import { useDashboard } from '@/shared/contexts/DashboardContext';
 import { Loader2 } from 'lucide-react';
 
 export default function DnsDnsvCalculationPage() {

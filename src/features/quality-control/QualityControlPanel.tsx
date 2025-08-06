@@ -8,7 +8,7 @@ import React, { useState, ChangeEvent } from 'react';
 import JSZip from 'jszip';
 import Papa from 'papaparse';
 import { useRouter } from 'next/navigation';
-import { useAppDataStore } from '@/stores/useAppDataStore';
+import { useAppDataStore } from '@/shared/stores/useAppDataStore';
 import { Loader2, PlayCircle, FileText, Folder, CheckCircle, Eye, Inbox, Upload, Trash2 } from 'lucide-react';
 
 import { FileData, ParsedSubFile, ProcessedFileDataForDisplay, QcApiResponse, PreviewableFile, StagedStructure } from './types';

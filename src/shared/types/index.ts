@@ -2,6 +2,23 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { type Layout, type Data } from 'plotly.js';
 
+// File upload types
+export interface FileData {
+  id: string;
+  name: string;
+  size: number;
+  type: string;
+  originalFileType: string;
+  lastModified: number;
+  isStructureFromZip: boolean;
+  content: any[];
+  headers: string[];
+  rawFileContent?: string | ArrayBuffer;
+  originalZipName?: string;
+  lasFiles?: any[];
+  csvFiles?: any[];
+}
+
 // Represents the structure of a Plotly chart object.
 // This replaces the old `PlotObject` for consistency.
 export interface PlotData {

@@ -3,7 +3,7 @@
 
 import { openDB, DBSchema, IDBPDatabase } from 'idb';
 import { nanoid } from 'nanoid';
-import { FileData, ProcessedFileDataForDisplay } from '../features/file_upload/types';
+import { FileData, ProcessedFileDataForDisplay } from '../types';
 
 const DB_NAME = 'file-storage-db';
 const STORE_UPLOADS = 'uploaded-files';

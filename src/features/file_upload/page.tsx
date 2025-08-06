@@ -7,15 +7,16 @@
 import React, { useState, ChangeEvent, useEffect } from 'react'; // Import useEffect
 import JSZip from 'jszip';
 
-import { ParsedSubFile, FileData, ProcessedFileDataForDisplay, StagedStructure } from './types';
+import { FileData, ProcessedFileDataForDisplay } from '@/shared/types';
+import { ParsedSubFile, StagedStructure } from './types';
 import { readFileContent, readFileAsArrayBuffer } from './utils/fileUtils';
 import { parseLASFile, parseCSVFile, parseXLSXFileWithSheetJS } from './utils/fileParser';
 import FileList from './components/FileList';
 import FilePreview from './components/FilePreview';
 import { useRouter } from 'next/navigation';
-import { useAppDataStore } from '@/stores/useAppDataStore';
+import { useAppDataStore } from '@/shared/stores/useAppDataStore';
 import { DownloadCloud, Plus, UploadCloud } from 'lucide-react';
-import { addMultipleFiles, getAllFiles, deleteFile as dbDeleteFile, clearAllFiles, addWellLogs, getAllWellLogs } from '../../lib/db';
+import { addMultipleFiles, getAllFiles, deleteFile as dbDeleteFile, clearAllFiles, addWellLogs, getAllWellLogs } from '@/shared/lib/db';
 
 export default function FileUploadViewer() {
   const [filesForDisplay, setFilesForDisplay] = useState<FileData[]>([]);
@@ -110,6 +111,7 @@ export default function FileUploadViewer() {
           name: structureNameFromMap === "_ROOT_FILES_IN_ZIP_" ? `${originalZipFile.name} (Root Files)` : structureNameFromMap,
           originalZipName: originalZipFile.name,
           size: originalZipFile.size,
+          type: originalZipFile.type,
           originalFileType: originalZipFile.type,
           lastModified: originalZipFile.lastModified,
           isStructureFromZip: true,
@@ -167,6 +169,7 @@ export default function FileUploadViewer() {
             id: file.name, // Use name as ID for single files
             name: file.name,
             size: file.size,
+            type: file.type,
             originalFileType: file.type,
             lastModified: file.lastModified,
             isStructureFromZip: false,

@@ -2,7 +2,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
 
-import { useAppDataStore } from '@/stores/useAppDataStore';
+import { useAppDataStore } from '@/shared/stores/useAppDataStore';
+import { ProcessedFileDataForDisplay } from '@/shared/types';
 import { Loader2, PlayCircle } from 'lucide-react';
 import React, { useState } from 'react';
 import { QcApiResponse, QcSummaryItem } from './types';
@@ -26,7 +27,7 @@ export default function QcRunner() {
 
         try {
             // Siapkan data yang akan dikirim ke backend
-            const filesToProcess = stagedStructure.files.map(file => ({
+            const filesToProcess = stagedStructure.files.map((file: ProcessedFileDataForDisplay) => ({
                 name: file.originalName || file.name,
                 content: file.rawContentString,
             }));

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // src/config/otherConfig.ts
-import { type LogDataRow } from '@/types'; // Sesuaikan path jika perlu
+import { type LogDataRow } from '@/shared/types'; // Sesuaikan path jika perlu
 
 /**
  * Mengonversi nilai pada kolom kedalaman dari feet ke meter.

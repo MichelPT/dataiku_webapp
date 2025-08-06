@@ -1,6 +1,6 @@
 // src/lib/data-loader.ts (Diperbarui untuk .csv)
 
-import { LogDataRow } from '@/types';
+import { LogDataRow } from '@/shared/types';
 import path from 'path';
 import fs from 'fs/promises';
 import Papa from 'papaparse'; // Import papaparse

@@ -17,7 +17,7 @@ interface StructureDetails {
         max?: number;
         count: number;
     }>;
-    sample_data: any[];
+    sample_data: Record<string, unknown>[];
     data_types: Record<string, string>;
 }
 
@@ -27,7 +27,7 @@ async function getStructureDetails(fieldName: string, structureName: string): Pr
     
     try {
         await fs.access(structurePath);
-    } catch (error) {
+    } catch {
         throw new Error(`Structure file not found: ${structurePath}`);
     }
 
@@ -36,7 +36,7 @@ async function getStructureDetails(fieldName: string, structureName: string): Pr
         const workbook = xlsx.read(file, { type: 'buffer' });
         const sheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[sheetName];
-        const data: any[][] = xlsx.utils.sheet_to_json(worksheet, { header: 1 });
+        const data: (string | number)[][] = xlsx.utils.sheet_to_json(worksheet, { header: 1 });
 
         if (data.length === 0) {
             throw new Error('Empty Excel file');
@@ -57,7 +57,7 @@ async function getStructureDetails(fieldName: string, structureName: string): Pr
 
         // Convert to objects for easier processing
         const records = data.slice(1).map(row => {
-            const obj: any = {};
+            const obj: Record<string, unknown> = {};
             headers.forEach((header, index) => {
                 obj[header] = row[index];
             });
@@ -65,7 +65,12 @@ async function getStructureDetails(fieldName: string, structureName: string): Pr
         });
 
         // Calculate statistics for numeric columns
-        const statistics: Record<string, any> = {};
+        const statistics: Record<string, {
+            mean?: number;
+            min?: number;
+            max?: number;
+            count: number;
+        }> = {};
         const dataTypes: Record<string, string> = {};
 
         headers.forEach(header => {
@@ -82,9 +87,9 @@ async function getStructureDetails(fieldName: string, structureName: string): Pr
             if (numericValues.length > values.length * 0.8) { // If >80% are numeric
                 dataTypes[header] = 'number';
                 statistics[header] = {
-                    mean: numericValues.length > 0 ? numericValues.reduce((a, b) => a + b, 0) / numericValues.length : null,
-                    min: numericValues.length > 0 ? Math.min(...numericValues) : null,
-                    max: numericValues.length > 0 ? Math.max(...numericValues) : null,
+                    mean: numericValues.length > 0 ? numericValues.reduce((a, b) => a + b, 0) / numericValues.length : undefined,
+                    min: numericValues.length > 0 ? Math.min(...numericValues) : undefined,
+                    max: numericValues.length > 0 ? Math.max(...numericValues) : undefined,
                     count: numericValues.length
                 };
             } else {
@@ -113,19 +118,22 @@ async function getStructureDetails(fieldName: string, structureName: string): Pr
 
         return structureDetails;
 
-    } catch (e: any) {
-        throw new Error(`Error reading structure file: ${e.message}`);
+    } catch (e: unknown) {
+        const errorMessage = e instanceof Error ? e.message : 'Unknown error';
+        throw new Error(`Error reading structure file: ${errorMessage}`);
     }
 }
 
 export async function GET(
     request: Request,
-    { params }: { params: { fieldName: string; structureName: string } }
+    { params }: { params: Promise<{ fieldName: string; structureName: string }> }
 ) {
     try {
-        const data = await getStructureDetails(params.fieldName, params.structureName);
+        const { fieldName, structureName } = await params;
+        const data = await getStructureDetails(fieldName, structureName);
         return NextResponse.json(data);
-    } catch (error: any) {
-        return NextResponse.json({ error: error.message }, { status: 404 });
+    } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        return NextResponse.json({ error: errorMessage }, { status: 404 });
     }
 }

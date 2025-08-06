@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { type Layout } from 'plotly.js';
-import { type LogDataRow } from '@/types';
+import { type LogDataRow } from '@/shared/types';
 import { rangeCol, DEPTH_COL, colorCol, dataCol, unitCol } from '@/features/results-display/config/plotConfig'; // Sesuaikan path jika perlu
 
 // Definisikan tipe untuk peta sumbu agar konsisten

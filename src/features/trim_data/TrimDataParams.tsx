@@ -4,8 +4,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useDashboard } from '@/contexts/DashboardContext';
-import { type ParameterRow } from '@/types';
+import { useDashboard } from '@/shared/contexts/DashboardContext';
+import { type ParameterRow } from '@/shared/types';
 import { Loader2 } from 'lucide-react';
 
 // Komponen helper untuk Form Field

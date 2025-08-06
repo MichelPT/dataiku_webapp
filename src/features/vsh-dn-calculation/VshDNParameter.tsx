@@ -2,10 +2,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useDashboard } from '@/contexts/DashboardContext';
-import { type ParameterRow } from '@/types';
+import { useDashboard } from '@/shared/contexts/DashboardContext';
+import { type ParameterRow } from '@/shared/types';
 import { Loader2 } from 'lucide-react';
-import { useAppDataStore } from '@/stores/useAppDataStore';
+import { useAppDataStore } from '@/shared/stores/useAppDataStore';
 
 // Fungsi diubah untuk menerima selectedIntervals dan membuat struktur data yang sesuai
 const createInitialVshDNParameters = (intervals: string[]): ParameterRow[] => {

@@ -2,8 +2,8 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { useDashboard } from '@/contexts/DashboardContext';
-import { useAppDataStore } from '@/stores/useAppDataStore';
+import { useDashboard } from '@/shared/contexts/DashboardContext';
+import { useAppDataStore } from '@/shared/stores/useAppDataStore';
 import { Loader2, AlertTriangle } from 'lucide-react';
 import dynamic from 'next/dynamic';
 

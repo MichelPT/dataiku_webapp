@@ -1,7 +1,8 @@
 
-// src/types/index.ts
+// src/features/file_upload/types/index.ts
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { type Layout, type Data } from 'plotly.js';
+import { FileData, ProcessedFileDataForDisplay } from '@/shared/types';
 
 // Represents the structure of a Plotly chart object.
 export interface PlotData {
@@ -18,32 +19,8 @@ export interface ParsedSubFile {
   rawContentString: string;
 }
 
-export interface FileData {
-  id: string;
-  name: string;
-  size: number;
-  originalFileType: string;
-  lastModified: number;
-  isStructureFromZip: boolean;
-  content: any[]; 
-  headers: string[]; 
-  rawFileContent?: string | ArrayBuffer; 
-  originalZipName?: string;
-  lasFiles?: ParsedSubFile[];
-  csvFiles?: ParsedSubFile[];
-}
-
-
-export interface ProcessedFileDataForDisplay {
-  id: string;
-  name: string;
-  originalName?: string;
-  structurePath?: string;
-  type: 'las-as-csv' | 'csv';
-  content: any[];
-  headers: string[];
-  rawContentString: string;
-}
+// Re-export shared types for backward compatibility
+export type { FileData, ProcessedFileDataForDisplay };
 
 export interface StagedStructure {
   userDefinedStructureName: string;

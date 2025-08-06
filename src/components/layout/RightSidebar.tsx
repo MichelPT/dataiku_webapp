@@ -1,173 +1,338 @@
-// src/components/layout/RightSidebar.tsx
+"use client"
 
-'use client';
-
-import React, { useState } from 'react';
-import Link from 'next/link';
-import { ChevronDown, ChevronRight } from 'lucide-react';
+import type React from "react"
+import { useState, useEffect, memo, useCallback } from "react"
+import Link from "next/link"
+import { ChevronDown, ChevronRight, Settings } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
+import { toast } from "sonner"
 
 interface RightSidebarProps {
-  activeButton: string | null;
+  activeButton: string | null
 }
 
 interface ModuleSectionProps {
-  title?: string;
-  buttons: (string | DropdownButton)[];
-  activeButton: string | null;
+  title?: string
+  buttons: (string | DropdownButton)[]
+  activeButton: string | null
+  isLoading?: boolean
 }
 
 interface DropdownButton {
-  label: string;
-  items: string[];
+  label: string
+  items: string[]
 }
 
-const ModuleSection: React.FC<ModuleSectionProps> = ({ title, buttons, activeButton }) => {
-  const [expandedDropdowns, setExpandedDropdowns] = useState<Set<string>>(new Set());
+const ModuleSection = memo(function ModuleSection({
+  title,
+  buttons,
+  activeButton,
+  isLoading = false,
+}: ModuleSectionProps) {
+  const [expandedDropdowns, setExpandedDropdowns] = useState<Set<string>>(new Set())
 
-  const toggleDropdown = (label: string) => {
-    const newExpanded = new Set(expandedDropdowns);
-    if (newExpanded.has(label)) {
-      newExpanded.delete(label);
-    } else {
-      newExpanded.add(label);
+  const toggleDropdown = useCallback((label: string) => {
+    setExpandedDropdowns((prev) => {
+      const newExpanded = new Set(prev)
+      if (newExpanded.has(label)) {
+        newExpanded.delete(label)
+        toast.info("Section collapsed", { description: `${label} section collapsed` })
+      } else {
+        newExpanded.add(label)
+        toast.info("Section expanded", { description: `${label} section expanded` })
+      }
+      return newExpanded
+    })
+  }, [])
+
+  const getRouteForItem = useCallback((itemName: string) => {
+    switch (itemName) {
+      case "VSH-GR":
+        return "vsh-calculation"
+      case "VSH-DN":
+        return "vsh-dn-calculation"
+      case "SW INDONESIA":
+        return "sw-calculation"
+      case "SW SIMANDOUX":
+        return "sw-simandoux"
+      case "RGSA":
+      case "DGSA":
+      case "NGSA":
+        return "rgsa-ngsa-dgsa"
+      default:
+        return itemName.toLowerCase().replace(/\s+/g, "-")
     }
-    setExpandedDropdowns(newExpanded);
-  };
+  }, [])
+
+  // Loading skeleton for module section
+  if (isLoading) {
+    return (
+      <Card className="border-gray-200 shadow-sm">
+        {title && (
+          <CardHeader className="py-1 px-3 bg-gray-50 rounded-t-lg border-b border-gray-100">
+            <div className="h-3 bg-gray-200 rounded animate-pulse w-20"></div>
+          </CardHeader>
+        )}
+        <CardContent className="p-1.5">
+          <div className="space-y-1">
+            {[...Array(buttons.length)].map((_, index) => (
+              <div key={index} className="h-7 bg-gray-200 rounded animate-pulse"></div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
 
   return (
-    <div className="bg-white rounded-lg shadow-sm p-2">
-      {title && <h3 className="text-xs font-bold text-gray-700 mb-1">{title}</h3>}
-      <div className="flex flex-col gap-1">
-        {buttons.map((btn) => {
-          if (typeof btn === 'string') {
-            // Regular button
-            const urlFriendlyBtn = btn.toLowerCase().replace(/\s+/g, '-');
-            const href = `/dashboard/modules/${urlFriendlyBtn}`;
-            const isActive = activeButton === urlFriendlyBtn;
+    <Card className="border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+      {title && (
+        <CardHeader className="py-1 px-3 bg-gray-50 rounded-t-lg border-b border-gray-100">
+          <CardTitle className="text-xs font-semibold text-gray-700 truncate">{title}</CardTitle>
+        </CardHeader>
+      )}
+      <CardContent className="p-1.5">
+        <div className="space-y-1">
+          {buttons.map((btn) => {
+            if (typeof btn === "string") {
+              const urlFriendlyBtn = btn.toLowerCase().replace(/\s+/g, "-")
+              const href = `/dashboard/modules/${urlFriendlyBtn}`
+              const isActive = activeButton === urlFriendlyBtn
 
-            return (
-              <Link href={href} key={btn}>
-                <button
-                  className={`w-full text-xs font-medium text-left p-1 rounded border transition-colors duration-200 ${isActive
-                    ? 'bg-gray-700 text-white border-gray-800'
-                    : 'text-black bg-gray-200 border-gray-300 hover:bg-gray-300'
+              return (
+                <Link href={href} key={btn}>
+                  <Button
+                    variant={isActive ? "default" : "outline"}
+                    className={`w-full justify-start text-xs h-7 px-2 ${
+                      isActive
+                        ? "bg-blue-500 text-white hover:bg-blue-600 border-blue-500"
+                        : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-gray-300"
                     }`}
-                >
-                  {btn}
-                </button>
-              </Link>
-            );
-          } else {
-            // Dropdown button
-            const isExpanded = expandedDropdowns.has(btn.label);
-            
-            return (
-              <div key={btn.label} className="space-y-0.5">
-                <button
-                  onClick={() => toggleDropdown(btn.label)}
-                  className="w-full text-xs font-medium text-left p-1 rounded border transition-colors duration-200 text-black bg-gray-200 border-gray-300 hover:bg-gray-300 flex items-center justify-between"
-                >
-                  <span>{btn.label}</span>
-                  {isExpanded ? (
-                    <ChevronDown className="w-3 h-3" />
-                  ) : (
-                    <ChevronRight className="w-3 h-3" />
-                  )}
-                </button>
-                {isExpanded && (
-                  <div className="ml-2 space-y-0.5">
-                    {btn.items.map((item) => {
-                      // Map dropdown items to their actual route names
-                      const getRouteForItem = (itemName: string) => {
-                        switch (itemName) {
-                          case 'VSH-GR':
-                            return 'vsh-calculation';
-                          case 'VSH-DN':
-                            return 'vsh-dn-calculation';
-                          case 'SW INDONESIA':
-                            return 'sw-calculation';
-                          case 'SW SIMANDOUX':
-                            return 'sw-simandoux';
-                          case 'RGSA':
-                          case 'DGSA':
-                          case 'NGSA':
-                            return 'rgsa-ngsa-dgsa';
-                          default:
-                            return itemName.toLowerCase().replace(/\s+/g, '-');
-                        }
-                      };
+                    onClick={() => {
+                      toast.success("Module selected", {
+                        description: `Navigating to ${btn}`,
+                      })
+                    }}
+                  >
+                    <span className="truncate text-left">{btn}</span>
+                  </Button>
+                </Link>
+              )
+            } else {
+              const isExpanded = expandedDropdowns.has(btn.label)
 
-                      const routeName = getRouteForItem(item);
-                      const href = `/dashboard/modules/${routeName}`;
-                      const isActive = activeButton === routeName;
+              return (
+                <Collapsible key={btn.label} open={isExpanded} onOpenChange={() => toggleDropdown(btn.label)}>
+                  <CollapsibleTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="w-full justify-between text-xs h-7 px-2 bg-white border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-gray-300"
+                    >
+                      <span className="truncate text-left">{btn.label}</span>
+                      {isExpanded ? (
+                        <ChevronDown className="w-3 h-3 ml-1 flex-shrink-0" />
+                      ) : (
+                        <ChevronRight className="w-3 h-3 ml-1 flex-shrink-0" />
+                      )}
+                    </Button>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="space-y-1 mt-1 ml-2">
+                    {btn.items.map((item) => {
+                      const routeName = getRouteForItem(item)
+                      const href = `/dashboard/modules/${routeName}`
+                      const isActive = activeButton === routeName
 
                       return (
                         <Link href={href} key={item}>
-                          <button
-                            className={`w-full text-xs font-normal text-left p-1 rounded border transition-colors duration-200 ${isActive
-                              ? 'bg-gray-700 text-white border-gray-800'
-                              : 'text-gray-700 bg-gray-100 border-gray-200 hover:bg-gray-200'
-                              }`}
+                          <Button
+                            variant={isActive ? "default" : "ghost"}
+                            size="sm"
+                            className={`w-full justify-start text-xs h-6 px-2 ${
+                              isActive
+                                ? "bg-blue-500 text-white hover:bg-blue-600"
+                                : "bg-transparent text-gray-500 hover:bg-gray-100 hover:text-gray-600"
+                            }`}
+                            onClick={() => {
+                              toast.success("Sub-module selected", {
+                                description: `Navigating to ${item}`,
+                              })
+                            }}
                           >
-                            {item}
-                          </button>
+                            <span className="truncate text-left">{item}</span>
+                          </Button>
                         </Link>
-                      );
+                      )
                     })}
-                  </div>
-                )}
-              </div>
-            );
-          }
-        })}
-      </div>
-    </div>
-  );
-};
+                  </CollapsibleContent>
+                </Collapsible>
+              )
+            }
+          })}
+        </div>
+      </CardContent>
+    </Card>
+  )
+})
 
 const RightSidebar: React.FC<RightSidebarProps> = ({ activeButton }) => {
+  const [isInitialLoading, setIsInitialLoading] = useState(true)
+  const [loadedSections, setLoadedSections] = useState<Set<string>>(new Set())
 
-  // const module1Buttons: string[] = ['ADD PLOT', 'OPEN CROSS PLOT'];
-  const qualityControlButtons: (string | DropdownButton)[] = ['TRIM DATA', 'DEPTH MATCHING', 'FILL MISSING', 'SMOOTHING', 'NORMALIZATION', 'SPLICING/MERGING'];
-  
+  // Simulate staggered loading for different sections
+  useEffect(() => {
+    const loadingSections = ["data-preparation", "interpretation", "gows"]
+
+    // Initial loading delay
+    const initialTimer = setTimeout(() => {
+      setIsInitialLoading(false)
+    }, 800)
+
+    // Staggered section loading
+    loadingSections.forEach((section, index) => {
+      setTimeout(
+        () => {
+          setLoadedSections((prev) => new Set([...prev, section]))
+        },
+        1000 + index * 300,
+      ) // Load each section 300ms apart
+    })
+
+    return () => {
+      clearTimeout(initialTimer)
+    }
+  }, [])
+
+  const qualityControlButtons: (string | DropdownButton)[] = [
+    "TRIM DATA",
+    "DEPTH MATCHING",
+    "FILL MISSING",
+    "SMOOTHING",
+    "NORMALIZATION",
+    "SPLICING/MERGING",
+  ]
+
   const logInterpretationButtons: (string | DropdownButton)[] = [
     {
-      label: 'VSH CALCULATION',
-      items: ['VSH-GR', 'VSH-DN']
+      label: "VSH CALCULATION",
+      items: ["VSH-GR", "VSH-DN"],
     },
-    'POROSITY CALCULATION', 
+    "POROSITY CALCULATION",
     {
-      label: 'SW CALCULATION',
-      items: ['SW INDONESIA', 'SW SIMANDOUX']
+      label: "SW CALCULATION",
+      items: ["SW INDONESIA", "SW SIMANDOUX"],
     },
-    'WATER RESISTIVITY CALCULATION'
-  ];
-  
+    "WATER RESISTIVITY CALCULATION",
+  ]
+
   const gowsButtons: (string | DropdownButton)[] = [
     {
-      label: 'RGSA',
-      items: ['RGSA', 'DGSA', 'NGSA']
+      label: "RGSA",
+      items: ["RGSA", "DGSA", "NGSA"],
     },
-    'RGBE-RPBE', 
-    'AUTO FLUID',
-    'RT RO',
-    'SWGRAD', 
-    'DNS-DNSV', 
-    'GWD'
-  ];
+    "RGBE-RPBE",
+    "AUTO FLUID",
+    "RT RO",
+    "SWGRAD",
+    "DNS-DNSV",
+    "GWD",
+  ]
+
+  // Full loading skeleton
+  if (isInitialLoading) {
+    return (
+      <aside className="w-52 bg-white border-l border-gray-200 flex flex-col shadow-sm">
+        <div className="p-4 border-b border-gray-200">
+          <div className="animate-pulse">
+            <div className="h-4 bg-gray-200 rounded w-28 mb-1"></div>
+            <div className="h-3 bg-gray-200 rounded w-20"></div>
+          </div>
+        </div>
+
+        <div className="flex-1 overflow-y-auto p-3 space-y-3">
+          {/* Data Preparation Section Skeleton */}
+          <Card className="border-gray-200 shadow-sm">
+            <CardHeader className="py-1 px-3 bg-gray-50 rounded-t-lg border-b border-gray-100">
+              <div className="h-3 bg-gray-200 rounded animate-pulse w-20"></div>
+            </CardHeader>
+            <CardContent className="p-1.5">
+              <div className="space-y-1">
+                {[...Array(6)].map((_, i) => (
+                  <div key={i} className="h-7 bg-gray-200 rounded animate-pulse"></div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Interpretation Section Skeleton */}
+          <Card className="border-gray-200 shadow-sm">
+            <CardHeader className="py-1 px-3 bg-gray-50 rounded-t-lg border-b border-gray-100">
+              <div className="h-3 bg-gray-200 rounded animate-pulse w-16"></div>
+            </CardHeader>
+            <CardContent className="p-1.5">
+              <div className="space-y-1">
+                {[...Array(4)].map((_, i) => (
+                  <div key={i} className="h-7 bg-gray-200 rounded animate-pulse"></div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* GOWS Section Skeleton */}
+          <Card className="border-gray-200 shadow-sm">
+            <CardHeader className="py-1 px-3 bg-gray-50 rounded-t-lg border-b border-gray-100">
+              <div className="h-3 bg-gray-200 rounded animate-pulse w-24"></div>
+            </CardHeader>
+            <CardContent className="p-1.5">
+              <div className="space-y-1">
+                {[...Array(7)].map((_, i) => (
+                  <div key={i} className="h-7 bg-gray-200 rounded animate-pulse"></div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </aside>
+    )
+  }
 
   return (
-    <aside className="w-52 bg-gray-100 flex flex-col gap-2 p-2 border-l border-gray-300 overflow-y-auto h-screen">
-      <div className="text-xs font-bold text-gray-800 px-2 py-1">Module Configuration</div>
-      <div className="flex flex-col gap-2">
-        {/* <ModuleSection buttons={['RENAME']} activeButton={activeButton} />
-        <ModuleSection buttons={module1Buttons} activeButton={activeButton} /> */}
-        <ModuleSection title="Data Preparation" buttons={qualityControlButtons} activeButton={activeButton} />
-        <ModuleSection title="Interpretation" buttons={logInterpretationButtons} activeButton={activeButton} />
-        <ModuleSection title="Gas Oil Water Scanner (GOWS)" buttons={gowsButtons} activeButton={activeButton} />
+    <aside className="w-52 bg-white border-l border-gray-200 flex flex-col shadow-sm">
+      <div className="p-4 border-b border-gray-200">
+        <div className="flex items-center gap-2">
+          <div className="p-1.5 bg-indigo-100 rounded-lg">
+            <Settings className="w-4 h-4 text-indigo-600" />
+          </div>
+          <div>
+            <h2 className="text-sm font-semibold text-gray-700">Module Configuration</h2>
+            <p className="text-xs text-gray-500">Select analysis modules</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex-1 overflow-y-auto p-3 space-y-3">
+        <ModuleSection
+          title="Data Preparation"
+          buttons={qualityControlButtons}
+          activeButton={activeButton}
+          isLoading={!loadedSections.has("data-preparation")}
+        />
+        <ModuleSection
+          title="Interpretation"
+          buttons={logInterpretationButtons}
+          activeButton={activeButton}
+          isLoading={!loadedSections.has("interpretation")}
+        />
+        <ModuleSection
+          title="Gas Oil Water Scanner (GOWS)"
+          buttons={gowsButtons}
+          activeButton={activeButton}
+          isLoading={!loadedSections.has("gows")}
+        />
       </div>
     </aside>
-  );
-};
+  )
+}
 
-export default RightSidebar;
+export default RightSidebar

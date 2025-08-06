@@ -1,7 +1,7 @@
 // src/features/data-input/components/DataTablePreview.tsx
 "use client";
 import React from 'react';
-import { PreviewableFile } from '@/types';
+import { PreviewableFile } from '@/shared/types';
 import { Eye } from 'lucide-react';
 
 const DataTablePreview: React.FC<{ file: PreviewableFile | null }> = ({ file }) => {

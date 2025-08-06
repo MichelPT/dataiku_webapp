@@ -1,12 +1,17 @@
-// src/components/layout/MainContent.tsx
+"use client"
 
-'use client';
-import React from 'react';
+import type React from "react"
 
-export default function MainContent({ children }: { children: React.ReactNode }) {
+import { memo } from "react"
+
+interface MainContentProps {
+  children: React.ReactNode
+}
+
+export const MainContent = memo(function MainContent({ children }: MainContentProps) {
   return (
     <main className="flex-1 relative overflow-y-auto bg-gray-100 p-4 h-screen">
         {children}
     </main>
-  );
-}
+  )
+})

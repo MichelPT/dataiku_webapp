@@ -7,7 +7,7 @@ import {
   StagedStructure,
   QCResponse,
   PreviewableFile,
-} from '@/types';
+} from '@/shared/types';
 
 // FIX #1: Definisikan tipe untuk parameter VSH di sini
 interface VshParams {

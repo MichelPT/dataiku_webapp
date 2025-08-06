@@ -1,10 +1,36 @@
-import StructuresDashboard from '@/components/structures/StructuresDashboard';
-import { StructuresData } from '@/types/structures';
+import StructuresDashboard from '@/components/business/structures/StructuresDashboard';
+import { StructuresData } from '@/shared/types/structures';
+import { StructuresLoadingSkeleton } from '@/components/business/structures/LoadingSkeleton';
+import { Suspense } from 'react';
 
 async function getStructuresData(): Promise<StructuresData | null> {
   try {
-    // For now, return mock data to display fields and structures only
-    // Replace this with actual backend call when your Python backend is ready
+    // Try to fetch from backend first
+    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
+    
+    if (backendUrl) {
+      console.log(`Fetching structures data from: ${backendUrl}/api/structures`);
+      
+      const res = await fetch(`${backendUrl}/api/structures`, {
+        cache: 'no-store',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        console.log('Successfully fetched data from backend');
+        return data;
+      } else {
+        console.error(`Backend API failed: ${res.status} ${res.statusText}`);
+      }
+    } else {
+      console.warn('NEXT_PUBLIC_BACKEND_URL is not set, falling back to mock data');
+    }
+
+    // Fallback to mock data if backend is not available
+    console.log('Using mock data for structures display');
     const mockData: StructuresData = {
       fields: [
         {
@@ -357,35 +383,7 @@ async function getStructuresData(): Promise<StructuresData | null> {
     // Populate the structures array from fields
     mockData.structures = mockData.fields.flatMap(field => field.structures);
 
-    console.log('Using mock data for structures display');
     return mockData;
-
-    // Uncomment this when your backend is ready:
-    /*
-    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
-    
-    if (!backendUrl) {
-      console.error('NEXT_PUBLIC_BACKEND_URL is not set in environment variables');
-      return null;
-    }
-
-    console.log(`Fetching structures data from: ${backendUrl}/api/structures`);
-    
-    const res = await fetch(`${backendUrl}/api/structures`, {
-      cache: 'no-store',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-
-    if (!res.ok) {
-      console.error(`Failed to fetch structures data: ${res.status} ${res.statusText}`);
-      return null;
-    }
-    
-    const data = await res.json();
-    return data;
-    */
   } catch (error) {
     console.error('Error fetching structures data:', error);
     return null;
@@ -427,5 +425,9 @@ export default async function StructuresPage() {
     );
   }
 
-  return <StructuresDashboard initialData={data} />;
+  return (
+    <Suspense fallback={<StructuresLoadingSkeleton />}>
+      <StructuresDashboard initialData={data} />
+    </Suspense>
+  );
 }
