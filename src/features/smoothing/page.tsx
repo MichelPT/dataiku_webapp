@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useDashboard } from '@/shared/contexts/DashboardContext';
-import { type ParameterRow } from '@/types';
+import { type ParameterRow } from '@/shared/types';
 import { Loader2 } from 'lucide-react';
 
 const createInitialSmoothingParameters = (intervals: string[]): ParameterRow[] => {

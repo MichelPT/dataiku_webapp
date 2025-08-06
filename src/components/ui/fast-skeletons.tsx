@@ -125,3 +125,81 @@ export function TableRowSkeleton() {
     </div>
   )
 }
+
+// Fast skeleton for data preparation page
+export function FastDataPreparationSkeleton() {
+  return (
+    <div className="p-6 space-y-6 bg-gray-50 min-h-full animate-pulse">
+      {/* Header Skeleton */}
+      <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-10 h-10 bg-gray-200 rounded-lg"></div>
+          <div>
+            <div className="h-8 w-48 bg-gray-200 rounded mb-2"></div>
+            <div className="h-4 w-64 bg-gray-200 rounded"></div>
+          </div>
+        </div>
+        <div className="flex items-center gap-6 p-4 bg-gray-50 rounded-lg border">
+          <div className="h-6 w-32 bg-gray-200 rounded"></div>
+          <div className="h-6 w-36 bg-gray-200 rounded"></div>
+        </div>
+      </div>
+
+      {/* Category Headers and Grids */}
+      {[...Array(3)].map((_, categoryIndex) => (
+        <div key={categoryIndex} className="space-y-4">
+          <div className="flex items-center gap-2">
+            <div className="h-6 w-40 bg-gray-200 rounded"></div>
+            <div className="h-5 w-16 bg-gray-200 rounded"></div>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[...Array(categoryIndex === 0 ? 3 : categoryIndex === 1 ? 2 : 1)].map((_, i) => (
+              <div key={i} className="bg-white rounded-lg border border-gray-200 p-6">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-gray-200 rounded-lg"></div>
+                    <div>
+                      <div className="h-6 w-24 bg-gray-200 rounded mb-1"></div>
+                      <div className="h-4 w-16 bg-gray-200 rounded"></div>
+                    </div>
+                  </div>
+                  <div className="h-5 w-16 bg-gray-200 rounded"></div>
+                </div>
+                <div className="space-y-3">
+                  <div className="h-4 w-full bg-gray-200 rounded"></div>
+                  <div className="h-4 w-3/4 bg-gray-200 rounded"></div>
+                  <div className="h-6 w-20 bg-gray-200 rounded"></div>
+                  <div className="flex gap-1">
+                    <div className="h-5 w-12 bg-gray-200 rounded"></div>
+                    <div className="h-5 w-16 bg-gray-200 rounded"></div>
+                  </div>
+                  <div className="h-10 w-full bg-gray-200 rounded"></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+
+      {/* Help Section Skeleton */}
+      <div className="bg-white rounded-lg border border-gray-200 p-6">
+        <div className="h-6 w-48 bg-gray-200 rounded mb-4"></div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-3">
+            <div className="h-5 w-32 bg-gray-200 rounded"></div>
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="h-4 w-full bg-gray-200 rounded"></div>
+            ))}
+          </div>
+          <div className="space-y-3">
+            <div className="h-5 w-32 bg-gray-200 rounded"></div>
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="h-4 w-full bg-gray-200 rounded"></div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
