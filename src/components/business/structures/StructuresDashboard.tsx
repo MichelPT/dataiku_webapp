@@ -316,7 +316,7 @@ export default function StructuresDashboard({ initialData }: StructuresDashboard
               </table>
             </div>
           ) : (
-            <div className="flex items-center justify-center h-32 text-gray-500">
+            <div className="flex items-center justify-center h-72 text-gray-500">
               <div className="text-center">
                 <FolderIcon className="w-16 h-16 mx-auto text-gray-300 mb-4" />
                 <p className="text-lg font-medium">Select a field to view structures</p>

@@ -18,6 +18,7 @@ interface ModuleSectionProps {
   buttons: (string | DropdownButton)[]
   activeButton: string | null
   isLoading?: boolean
+  ClassName?: string
 }
 
 interface DropdownButton {
@@ -89,11 +90,12 @@ const ModuleSection = memo(function ModuleSection({
   return (
     <Card className="border-gray-200 shadow-sm hover:shadow-md transition-shadow">
       {title && (
-        <CardHeader className="py-1 px-3 bg-gray-50 rounded-t-lg border-b border-gray-100">
-          <CardTitle className="text-xs font-semibold text-gray-700 truncate">{title}</CardTitle>
+        <CardHeader className="rounded-t-lg border-b border-gray-100">
+          <CardTitle className="text-sm text-center font-semibold text-gray-700 truncate">{title}</CardTitle>
         </CardHeader>
       )}
-      <CardContent className="p-1.5">
+      {/* <CardContent className="p-1.5"> */}
+      <CardContent>
         <div className="space-y-1">
           {buttons.map((btn) => {
             if (typeof btn === "string") {

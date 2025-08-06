@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { useDashboard } from '@/contexts/DashboardContext';
-import { type ParameterRow } from '@/types';
+import { useDashboard } from '@/shared/contexts/DashboardContext';
+import { type ParameterRow } from '@/shared/types';
 import { Loader2 } from 'lucide-react';
 
 // Fungsi ini diubah untuk mendefinisikan parameter khusus untuk Splicing

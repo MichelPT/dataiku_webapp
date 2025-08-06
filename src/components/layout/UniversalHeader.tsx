@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useRouter, usePathname } from "next/navigation"
-import { Database, Folder, LayoutDashboard, Menu } from "lucide-react"
+import { Database, Folder, LayoutDashboard, Menu, Upload } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import { cn } from "@/shared/lib/utils"
@@ -25,6 +25,12 @@ const navItems = [
     path: "/structures",
     icon: Folder,
     description: "Browse data structures",
+  },
+  {
+    label: "Data Preparation",
+    path: "/data-preparation",
+    icon: Upload,
+    description: "Prepare and clean your data",
   },
   {
     label: "Dashboard",
@@ -83,6 +89,7 @@ export default function UniversalHeader() {
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-white">
               <Database className="h-4 w-4" />
             </div>
+            <span className="text-lg font-semibold text-gray-900">Dataiku</span>
           </div>
 
           {/* Desktop Navigation */}
