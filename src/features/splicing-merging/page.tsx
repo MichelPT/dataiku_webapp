@@ -64,13 +64,15 @@ export default function SplicingParams() {
 
     // Atur pilihan default untuk dropdown Run 1 dan Run 2 saat daftar file berubah
     useEffect(() => {
+        // Otomatis pilih file pertama dan kedua jika tersedia
         if (selectedWells.length >= 2) {
             setSelectedRun1Path(selectedWells[0]);
             setSelectedRun2Path(selectedWells[1]);
         } else if (selectedWells.length === 1) {
             setSelectedRun1Path(selectedWells[0]);
-            setSelectedRun2Path('');
+            setSelectedRun2Path(''); // Kosongkan pilihan kedua
         } else {
+            // Kosongkan semua jika tidak ada file yang dipilih
             setSelectedRun1Path('');
             setSelectedRun2Path('');
         }
@@ -84,11 +86,11 @@ export default function SplicingParams() {
     const getColumnsForParameter = (parameterName: string): string[] => {
         const fallbackOptions = ['GR', 'NPHI', 'RHOB', 'RT', 'GR_CAL', 'TNPH', 'RHOZ', 'RLA5', 'DGRCC', 'TNPL', 'ALCDLC', 'R39PC'];
         if (parameterName.includes('_RUN1')) {
-            return run1Columns.length > 0 ? run1Columns : fallbackOptions;
+            return run1Columns.length > 0 ? run1Columns.sort() : fallbackOptions;
         } else if (parameterName.includes('_RUN2')) {
-            return run2Columns.length > 0 ? run2Columns : fallbackOptions;
+            return run2Columns.length > 0 ? run2Columns.sort() : fallbackOptions;
         } else {
-            const combined = [...new Set([...run1Columns, ...run2Columns])];
+            const combined = [...new Set([...run1Columns, ...run2Columns])].sort();
             return combined.length > 0 ? combined : fallbackOptions;
         }
     };
@@ -110,12 +112,19 @@ export default function SplicingParams() {
                 return acc;
             }, {} as Record<string, string | number>);
 
+        const getWellNameFromPath = (path: string): string => {
+            if (!path) return '';
+            return path.split('/').pop()?.replace(/\.csv$/, '') || '';
+        };
+
         const payload = {
             params: formParams,
             run1_file_path: selectedRun1Path,
             run2_file_path: selectedRun2Path,
+            run1_well: getWellNameFromPath(selectedRun1Path),
+            run2_well: getWellNameFromPath(selectedRun2Path)
         };
-
+        
         const apiUrl = process.env.NEXT_PUBLIC_API_URL;
         const endpoint = `${apiUrl}/api/run-splicing`;
 
@@ -133,14 +142,13 @@ export default function SplicingParams() {
             
             const result = await response.json();
             
-            // Generate plot setelah splicing berhasil
             const plotResponse = await fetch(`${apiUrl}/api/get-splicing-plot`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ file_path: result.output_file_path }),
             });
             
-            if (!plotResponse.ok) throw new Error('Failed to generate plot');
+            if (!plotResponse.ok) throw new Error('Failed to generate plot after splicing');
             
             const plotData = await plotResponse.json();
             const parsedPlotData = typeof plotData === 'string' ? JSON.parse(plotData) : plotData;
@@ -151,7 +159,7 @@ export default function SplicingParams() {
                     layout: parsedPlotData.layout || {}
                 });
                 alert(result.message || "Splicing/Merging completed! Plot has been generated.");
-                router.push('/data-prep/viewer'); // Arahkan ke viewer untuk melihat plot
+                router.push('/dashboard');
             } else {
                 throw new Error('Invalid plot data structure');
             }
@@ -270,7 +278,8 @@ export default function SplicingParams() {
                                                 </select>
                                             ) : (
                                                 <input 
-                                                    type="text" 
+                                                    type="number" 
+                                                    step="any"
                                                     value={param.values['default'] ?? ''} 
                                                     onChange={(e) => handleValueChange(param.id, e.target.value)} 
                                                     className="w-full min-w-[100px] p-1 bg-white" 
